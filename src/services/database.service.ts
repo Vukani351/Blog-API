@@ -6,7 +6,6 @@ import * as dotenv from 'dotenv';
 // Global Variables
 export const collections: { users?: mongoDB.Collection, post?: mongoDB.Collection } = {};
 
-
 // Initialize Connection
 
 export async function connectToDatabase() {
@@ -26,3 +25,9 @@ export async function connectToDatabase() {
        
   console.log(`Successfully connected to database: ${db.databaseName} and collection: ${userCollection.collectionName}`);
 }
+
+/*
+  * TODO:
+  * 1. find the proper way to connect to the DB so that one connection string will allow us to connect & do operations on users & posts of the same DB.
+  * 2. Test using the models rather than just making calls to the db.
+*/

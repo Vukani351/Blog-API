@@ -188,3 +188,9 @@ userRouter.post('/register', async (req:Request, res:Response) => {
     res.status(503).json({ msg: 'Server error!' });
   }
 });
+
+/*
+  * TODO:
+  * consider cleaning up the code by removing redundant parameters like query params.
+
+*/
