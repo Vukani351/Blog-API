@@ -17,7 +17,7 @@ const JWT_SECRET = 'dance';
 userRouter.use(express.json());
 
 // GET
-userRouter.get('/', async (_req: Request, res: Response) => {
+userRouter.get('/', auth, async (_req: Request, res: Response) => {
 
   try {
     const users = (await collections.users?.find({}).toArray() || '') as unknown as User[];
@@ -47,7 +47,7 @@ userRouter.get('/:id', auth, async (req: Request, res: Response) => {
 });
 
 // POST
-userRouter.post('/', auth, async (req: Request, res: Response) => {
+userRouter.post('/publish', auth, async (req: Request, res: Response) => {
   try {
     const newUser = req.body as User;
     const result = await collections.users?.insertOne(newUser);
@@ -122,7 +122,7 @@ userRouter.post('/login', async (req:Request, res:Response) => {
     const user = (await collections.users?.findOne({ email: query })) as unknown as User;
     
     if (!user) {
-      return res.status(400).send('Email already exists ');
+      return res.status(400).send('Email does not exists ');
     } else {
       if (user && user?.password === req.body.password) {
         const accessToken = jwt.sign(

@@ -2,13 +2,13 @@
 import express from 'express';
 import { connectToDatabase } from './services/database.service';
 import { userRouter } from './routes/users.router';
-import postsController from './controllers/postsController';
+import postsRouter from './routes/posts.router';
 
 
 const app = express();
 connectToDatabase()
   .then(() => {
-    app.use('/posts', postsController);
+    app.use('/posts', postsRouter);
     app.use('/user', userRouter);
    
     app.listen('5000', () => {

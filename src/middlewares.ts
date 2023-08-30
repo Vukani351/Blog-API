@@ -34,6 +34,7 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
 
     if (!token) {
       throw new Error();
+      res.send("Sorry this use isn't authenticated.");
     }
 
     const decoded = jwt.verify(token, SECRET_KEY);
