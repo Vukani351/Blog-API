@@ -47,7 +47,7 @@ userRouter.get('/:id', auth, async (req: Request, res: Response) => {
 });
 
 // POST
-userRouter.post('/publish', auth, async (req: Request, res: Response) => {
+userRouter.post('/register', auth, async (req: Request, res: Response) => {
   try {
     const newUser = req.body as User;
     const result = await collections.users?.insertOne(newUser);
@@ -119,6 +119,7 @@ userRouter.delete('/:id', auth, async (req: Request, res: Response) => {
 userRouter.post('/login', async (req:Request, res:Response) => {
   try {
     const query = req.body.email;
+    console.log('email: ', query);
     const user = (await collections.users?.findOne({ email: query })) as unknown as User;
     
     if (!user) {
@@ -138,6 +139,10 @@ userRouter.post('/login', async (req:Request, res:Response) => {
           succes: true,          
           email: user.email,
           token: accessToken,   
+        });
+      } else {
+        res.status(400).json({ 
+          msg: 'Login error!',
         });
       }
     }

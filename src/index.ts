@@ -6,6 +6,11 @@ import postsRouter from './routes/posts.router';
 
 
 const app = express();
+const cors = require('cors');
+app.use(cors({
+  origin: '*',
+}));
+
 connectToDatabase()
   .then(() => {
     app.use('/posts', postsRouter);
