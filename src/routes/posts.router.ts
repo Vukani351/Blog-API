@@ -21,16 +21,18 @@ export const postRouter = express.Router();
 // Tell the router what parser to use:
 postRouter.use(express.json());
 dotenv.config();
-// const JWT_SECRET = 'dance';
-// getting all posts:
-postRouter.get('/', auth, async (req: Request, res:Response) => {
+
+/* 
+  ~ Get all posts route
+  * add auth for testing till we can see that we can remove token from ui.
+*/
+postRouter.get('/', async (req: Request, res:Response) => {
   try {
-    
     const posts = (await collections.post?.find().toArray()) as unknown as Post[];
 
     res.status(200).send(posts);
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).send(error);  
   }
 });
 
@@ -38,6 +40,7 @@ postRouter.get('/', auth, async (req: Request, res:Response) => {
   * TODO:
   * change the query to get posts from using the id but using the headline or title of the article.
   * we do this by using body to query not the params.
+  * This route is used for when the article already exists but we want to edit the content.
 */
 postRouter.post('/edit', auth, async (req:Request, res:Response) => {
   // const update: object = (req.body.updates) as Post;
@@ -57,8 +60,12 @@ postRouter.post('/edit', auth, async (req:Request, res:Response) => {
 
 
 // POST
+/*
+  * POST /publish
+  * This route is for when the user adds a new article then publishes it.
+*/
 postRouter.post('/publish', auth, async (req:Request, res:Response) => {
-  const title = (req.body as Post);
+  // const title = (req.body as Post);
   // console.log('title: ', title);
   try {
     // let title = req.body.title;

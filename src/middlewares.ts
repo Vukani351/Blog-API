@@ -28,9 +28,16 @@ export interface CustomRequest extends Request {
   token: string | JwtPayload;
 }
 
+export const getBearerToken = (rawToken: string) => {
+  return rawToken?.replace('Bearer ', '');
+};
+
 export const auth = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const token = req.header('Authorization')?.replace('Bearer ', '');; // get the session cookie from request header
+
+    if (!token) return res.sendStatus(401); // if there is no cookie from request header, send an unauthorized response.
+    // const cookie = authHeader.split('=')[1];
 
     if (!token) {
       throw new Error();

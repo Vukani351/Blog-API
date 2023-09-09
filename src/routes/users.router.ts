@@ -7,7 +7,7 @@ import { collections } from '../services/database.service';
 import User from '../models/userModels';
 import jwt from 'jsonwebtoken';
 import * as dotenv from 'dotenv';
-import { auth } from '../middlewares';
+import { auth, getBearerToken, SECRET_KEY } from '../middlewares';
 
 // Global Config
 export const userRouter = express.Router();
@@ -46,34 +46,6 @@ userRouter.get('/:id', auth, async (req: Request, res: Response) => {
   }
 });
 
-// POST
-userRouter.post('/register', auth, async (req: Request, res: Response) => {
-  try {
-    const newUser = req.body as User;
-    const result = await collections.users?.insertOne(newUser);
-
-    // let { email, password } = req.body;
- 
-    // let existingUser;
-    // try {
-    //   existingUser = await collections.users?.findOne({ email: email });
-    // } catch {
-    //   const error = new Error('Error! Something went wrong.');
-    //   return (error);
-    // }
-    // if (!existingUser || existingUser.password != password) {
-    //   const error = Error('Wrong details please check at once');
-    //   return (error);
-    // }
-    
-    result
-      ? res.status(201).send(`Successfully created a new user with id ${result.insertedId}`)
-      : res.status(500).send('Failed to create a new user.');
-  } catch (error) {
-    console.error(error);
-    res.status(400).send('error.message');
-  }
-});
 
 // PUT
 userRouter.put('/:id', auth, async (req: Request, res: Response) => {
@@ -119,7 +91,6 @@ userRouter.delete('/:id', auth, async (req: Request, res: Response) => {
 userRouter.post('/login', async (req:Request, res:Response) => {
   try {
     const query = req.body.email;
-    console.log('email: ', query);
     const user = (await collections.users?.findOne({ email: query })) as unknown as User;
     
     if (!user) {
@@ -130,15 +101,27 @@ userRouter.post('/login', async (req:Request, res:Response) => {
           { email: req.body.email },
           JWT_SECRET,
           {
-            expiresIn: process.env.NODE_ENV === 'production' ? '6h' : '2 days',
+            expiresIn: process.env.NODE_ENV === 'production' ? '6h' : '1h',
           },
         );
         res.header('Authorization', accessToken);
-        // res.status(200).send('User Loged In.');
-        res.status(200).json({
-          succes: true,          
+        /*
+          ~ code aditions for the logout functinoality using cookies
+        */
+        // let options = {
+        //   maxAge: 20 * 60 * 1000, // would expire in 20minutes
+        //   httpOnly: true, // The cookie is only accessible by the web server
+        //   secure: true,
+        //   sameSite: 'none' as boolean | 'lax' | 'strict' | 'none' | undefined,
+        // };
+  
+        // res.header('Authentication', accessToken);
+        // res.cookie('sessionID', accessToken, options);
+  
+        res.status(200).json({      
           email: user.email,
-          token: accessToken,   
+          token: accessToken,
+          img: user.img,
         });
       } else {
         res.status(400).json({ 
@@ -180,17 +163,47 @@ userRouter.post('/register', async (req:Request, res:Response) => {
             expiresIn: process.env.NODE_ENV === 'production' ? '6h' : '2 days',
           },
         );
-        
-        res.header('auth-token', accessToken);
+
         res.status(201).json({
-          succes: true,
           email: addedUser.email,          
+          token: accessToken,
+          img: 'https://images.unsplash.com/photo-1417325384643-aac51acc9e5d?q=75&fm=jpg&w=200&fit=max',
         });
       }
     }
   } catch (err) {
     console.log(err);
     res.status(503).json({ msg: 'Server error!' });
+  }
+});
+
+/*
+  * TODO:
+  * Add the logout functionality.
+
+*/
+
+userRouter.post('/logout', async (req:Request, res:Response) => {
+  try {
+    const authHeader = req.headers; /* get the session cookie from request header. */
+
+    if (!(authHeader)) { 
+      res.status(200).json({ message: 'You are not logged in my guy!' });
+      return res.sendStatus(204); /* No content */
+    } else {
+      // const expiringToken = jwt.verify(authHeader.authorization || '', SECRET_KEY);
+      const expiringToken = jwt.verify(getBearerToken(authHeader.authorization as  string), SECRET_KEY);
+      
+      console.log('authHeader: ', expiringToken);
+  
+      // res.setHeader('Clear-Site-Data', '"cookies", "storage"');
+      res.status(200).json({ message: 'You are logged out!' });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ 
+      msg: 'User Login Error!',
+    });
   }
 });
 
