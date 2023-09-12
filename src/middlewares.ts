@@ -33,15 +33,21 @@ export const getBearerToken = (rawToken: string) => {
 };
 
 export const auth = async (req: Request, res: Response, next: NextFunction) => {
+  /*
+  * Add header functionality with cookies.
+  */
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');; // get the session cookie from request header
-
-    if (!token) return res.sendStatus(401); // if there is no cookie from request header, send an unauthorized response.
-    // const cookie = authHeader.split('=')[1];
+    const token = req.header('Authorization')?.replace('Bearer ', ''); // get the session cookie from request header
 
     if (!token) {
+      return res.status(402).send({ 
+        messsage: 'Sorry your token has expired .', status: 402, 
+      });
+    } // if there is no cookie from request header, send an unauthorized response.
+
+    if (!token) {
+      res.status(502).send({ messsage: "Sorry this use isn't authenticated.", status: 502 });
       throw new Error();
-      res.send("Sorry this use isn't authenticated.");
     }
 
     const decoded = jwt.verify(token, SECRET_KEY);
@@ -49,6 +55,6 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
 
     next();
   } catch (err) {
-    res.status(401).send('Please authenticate');
+    res.status(401).send({ message: 'Please authenticate', status: 401 });
   }
 };
