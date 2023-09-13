@@ -152,7 +152,6 @@ userRouter.post('/register', async (req:Request, res:Response) => {
     } else {
       if (newUser && newUser?.password != '') {
         const addedUser = (await collections.users?.insertOne( newUser )) as unknown as User;
-        console.log('added....', addedUser.email);
         const accessToken = jwt.sign(
           { email: req.body.email },
           JWT_SECRET,
