@@ -46,9 +46,8 @@ postRouter.get('/', async (req: Request, res:Response) => {
 */
 postRouter.put('/edit', auth, async (req:Request, res:Response) => {
   try {
-   
-    const filter = { title: req.body.title };
-    const updateDoc = { $set: { ...req.body.body } };
+    const filter = { _id: req.body._id };
+    const updateDoc = { $set: { ...req.body } };
 
     let articleUpdateStatus = await collections.post?.updateOne(filter, updateDoc, { upsert: true });
     res.status(200).send({ message: `Successfully edited ${req.body.title}`, data: articleUpdateStatus, status: 200  });
@@ -56,7 +55,6 @@ postRouter.put('/edit', auth, async (req:Request, res:Response) => {
     res.status(500).send({ message: 'Edit Error!! ', status: 500 });
   }
 });
-
 
 /*
   * POST /publish
