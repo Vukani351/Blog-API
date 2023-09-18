@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "/opt/render/project",
+    "outDir": "dist",
     "sourceMap": true,
     "target": "esnext",
     "module": "commonjs",
