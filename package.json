@@ -5,7 +5,8 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "ts-node src/index.ts",
-    "start-prod": "node ./dist/index.js",
+    "start-prod": "node index.js",
+    "start-prod'render": "node ./src/index.js",
     "dev": "nodemon src/index.ts",
     "prod": "node ./index.js",
     "build": "tsc",
