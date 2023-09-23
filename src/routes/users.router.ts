@@ -7,7 +7,7 @@ import { collections } from '../services/database.service';
 import User from '../models/userModels';
 import jwt from 'jsonwebtoken';
 import * as dotenv from 'dotenv';
-import { auth, getBearerToken, SECRET_KEY } from '../middlewares';
+import { auth } from '../middlewares';
 
 // Global Config
 export const userRouter = express.Router();
@@ -90,6 +90,7 @@ userRouter.delete('/:id', auth, async (req: Request, res: Response) => {
 userRouter.post('/login', async (req:Request, res:Response) => {
   try {
     const query = req.body.email;
+    console.log(req.body);
     const user = (await collections.users?.findOne({ email: query })) as unknown as User;
     
     if (!user) {
@@ -175,26 +176,26 @@ userRouter.post('/register', async (req:Request, res:Response) => {
 
 /*
   * TODO:
-  * Add the logout functionality.
-
+  * Add the forgot password functionality.
+  * if we find user we will send a link email so that the user can reset the password.
 */
 
-userRouter.post('/logout', async (req:Request, res:Response) => {
-  try {
-    const authHeader = req.headers; /* get the session cookie from request header. */
-
-    if (!(authHeader)) { 
-      res.status(200).json({ message: 'You are not logged in my guy!' });
-      return res.sendStatus(204); /* No content */
-    } else {
-      // const expiringToken = jwt.verify(authHeader.authorization || '', SECRET_KEY);
-      const expiringToken = jwt.verify(getBearerToken(authHeader.authorization as  string), SECRET_KEY);
-      
-      console.log('authHeader: ', expiringToken);
+userRouter.post('/forgotpassword', async (req:Request, res:Response) => {
+  const query = req.body.email;
   
-      // res.setHeader('Clear-Site-Data', '"cookies", "storage"');
-      res.status(200).json({ message: 'You are logged out!' });
+  try {
+    
+    const user = (await collections.users?.findOne( { email: query } )) as unknown as User;
+    if (user && user.email != '') {
+      res.status(200).json({ 
+        message: 'Please check your email !!', status: 200,
+      });
+    } else {
+      res.status(200).json({ 
+        message: 'This email does not exist !!', status: 400,
+      });
     }
+    
   } catch (err) {
     console.log(err);
     res.status(500).json({ 

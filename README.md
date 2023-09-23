@@ -28,7 +28,8 @@
 | bcrypt      | missing     |
 | email validator      | missing     |
 
-## Blocks of code
+## Blocks of code:
+
 
 
 ## End...
