@@ -58,3 +58,4 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
     res.status(401).send({ message: 'Please authenticate', status: 401 });
   }
 };
+

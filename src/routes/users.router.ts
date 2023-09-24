@@ -8,6 +8,7 @@ import User from '../models/userModels';
 import jwt from 'jsonwebtoken';
 import * as dotenv from 'dotenv';
 import { auth } from '../middlewares';
+const MailSlurp = require('mailslurp-client').default;
 
 // Global Config
 export const userRouter = express.Router();
@@ -26,21 +27,30 @@ userRouter.get('/', auth, async (_req: Request, res: Response) => {
   } catch (error) {
     res.status(500).send('error.message');
   }
-});
+}); 
 
-userRouter.get('/:id', auth, async (req: Request, res: Response) => {
-  const id = req?.params?.id;
-  // const email = req?.body?.id;
-
-  try {
-        
-    const query = { _id: new ObjectId(id) };
-    // const query = { id: `${id}` };
-    const user = (await collections.users?.findOne({ query })) as unknown as User;
-
+userRouter.put('/reset', async (req: Request, res: Response) => {
+  /*
+  * To make the reset work we need to go to 'reset' on the blog.
+  * we need to add email and new password.
+  */
+ 
+  try {        
+    const query = { email: req?.body?.email };
+    const filter = { query };
+    
+    const user = (await collections.users?.findOne(query)) as unknown as User;
     if (user) {
-      res.status(200).send(user);
+      user.password = req.body.password;
+      const updateDoc = { $set: { ...user } };
+      (await collections.users?.updateOne(filter, updateDoc, { upsert: false })) as unknown as User;
     }
+    res.status(200).send({
+      email: user.email,
+      message: 'User Updated !!',
+      img: user.img,
+      status: 200,
+    });
   } catch (error) {
     res.status(404).send(`Unable to find matching document with id: ${req.params.id}`);
   }
@@ -184,11 +194,37 @@ userRouter.post('/forgotpassword', async (req:Request, res:Response) => {
   const query = req.body.email;
   
   try {
-    
+    /*
+    * set up for sending emails.
+    * provide a mailslurp API KEY
+    */
+    const apiKey = '45ac38d11ed4c010b2c94171f9417d4f94363bc41f1e0623b57292adfaa09485';
     const user = (await collections.users?.findOne( { email: query } )) as unknown as User;
+    let config = { apiKey };
+    const mailslurp = new MailSlurp(config);
+    const server = await mailslurp.getImapSmtpAccessDetails();
+    const opts = {
+      host: server.smtpServerHost,
+      port: server.smtpServerPort,
+      secure: false,
+      auth: {
+        user: server.smtpUsername,
+        pass: server.smtpPassword,
+        type: 'PLAIN',
+      },
+    };
+
     if (user && user.email != '') {
+      const inbox = await mailslurp.createInbox();
+      const options = {
+        to: ['gcabashevukani3@gmail.com'],
+        subject: 'Hello',
+        body: 'Welcome',
+      };
+      const sent = await mailslurp.sendEmail(inbox.id, options);
+      console.log('sent: \n', sent);
       res.status(200).json({ 
-        message: 'Please check your email !!', status: 200,
+        message: 'Please check your email !!', status: 200, data: sent,
       });
     } else {
       res.status(200).json({ 
